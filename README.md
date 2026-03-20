@@ -1,99 +1,169 @@
-📚 Домашняя библиотека — REST API
+# 📚 Home Library API
 
-REST API для управления списком книг.
-Приложение позволяет:
+[![Python](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-black?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-Async-orange?logo=sqlalchemy)](https://www.sqlalchemy.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![SQLite](https://img.shields.io/badge/Database-SQLite-green?logo=sqlite)](https://sqlite.org/)
 
-* ➕ Добавлять книги
+**REST API для управления домашней библиотекой книг.** Полный CRUD с валидацией, асинхронной БД и автодокументацией.
 
-* 📖 Получать список всех книг
+## ✨ Возможности
 
-* 🔍 Искать конкретную книгу
+| ➕ | **Создание** книг с валидацией |
+|---|-------------------------------|
+| 📖 | **Чтение** всех книг или по ID |
+| ✏️ | **Обновление** данных книги   |
+| 🗑 | **Удаление** книг            |
+| 🔍 | **Автодокументация** Swagger/ReDoc |
+<br>
 
-* ✏️ Обновлять данные книги
+## 🗂 Структура проекта
+```
+Home-Library-API/
+├── my_library/
+│ ├── main.py # 🚀 Точка входа FastAPI
+│ ├── database.py # 🛠 Engine и сессии БД
+│ ├── models/
+│ │ └── books.py # 🏗 SQLAlchemy модели
+│ ├── schemas/
+│ │ └── books.py # 📐 Pydantic схемы
+│ ├── routers/
+│ │ └── books.py # 🌐 API роуты
+│ └── repository/
+│ └── books.py # 💾 Репозиторий паттерны
+└── README.md
+```
 
-* 🗑 Удалять книги
+---
 
+## 📋 Модель БД (SQLite)
 
-🗂 Структура проекта
-my_library/
-├── main.py              # 🚀 Запуск приложения, подключение роутеров
-├── database.py          # 🛠 Настройка движка (Engine) и сессий
-├── models/              # 🏗 SQLAlchemy модели (таблицы)
-│   └── books.py
-├── schemas/             # 📐 Pydantic схемы (валидация)
-│   └── books.py
-├── routers/             # 🌐 Эндпоинты (HTTP-логика)
-│   └── books.py
-├── repository/          # 💾 Логика работы с БД (SQL-запросы)
-│   └── books.py
+| Поле     | Тип      | Описание                  |
+|----------|----------|---------------------------|
+| `id`     | `int`    | 🔑 **Primary Key**        |
+| `title`  | `str`    | 📖 **Название** (req)     |
+| `author` | `str`    | ✍️ **Автор** (req)        |
+| `year`   | `int`    | 🗓 **Год**                |
+| `pages`  | `int`    | 📄 **Страницы** (>10)     |
+| `is_read`| `bool`   | ✅ **Прочитано** (def: F) |
 
+<br>
 
-📝 Модель данных (База данных)
-    Поле	Тип SQL	Тип Python	Описание
-    id	INTEGER	int	🔑 Первичный ключ (Primary Key)
-    title	VARCHAR	str	📖 Название книги (не может быть пустым)
-    author	VARCHAR	str	✍️ Автор книги (не может быть пустым)
-    year	INTEGER	int	🗓 Год издания
-    pages	INTEGER	int	📄 Количество страниц (минимум 10)
-    is_read	BOOLEAN	bool	✅ Прочитана ли книга (по умолчанию False)
+## 🌐 API Эндпоинты
 
-    
-📦 Схемы данных (Pydantic)
-    1) SBookAdd — создание/обновление книги
-    
-    Поля: title, author, year, pages, is_read
-    
-    Все поля обязательны, кроме is_read (по умолчанию False)
-    
-    Валидация: pages > 10
+| Метод | Endpoint       | Описание       | Статус    |
+|-------|----------------|----------------|-----------|
+| `POST`| `/books/`      | ➕ Создать     | `201`     |
+| `GET` | `/books/`      | 📖 Все книги  | `200`     |
+| `GET` | `/books/{id}`  | 🔍 По ID      | `200/404` |
+| `PUT` | `/books/{id}`  | ✏️ Обновить   | `200/404` |
+| `DEL` | `/books/{id}`  | 🗑 Удалить    | `204/404` |
 
-    2) SBook — возвращаемый объект
-    
-    Все поля из SBookAdd + id
-    
-    Настройка: from_attributes = True
+---
 
-🌐 API Эндпоинты
+## 🚀 Быстрый старт
 
-Все методы используют Dependency Injection для получения сессии БД и Repository для работы с SQL.
+### 1. Клонирование
+```bash
+git clone https://github.com/Mustafath/Home-Library-API.git
+cd Home-Library-API/my_library
+```
 
-    🔹 Метод	URL	Описание	Вход	Выход	Статус
-    POST	/books	➕ Добавить книгу	JSON (SBookAdd)	JSON (SBook)	201 Created
-    GET	/books	📖 Получить все книги	—	Список JSON (list[SBook])	200 OK
-    GET	/books/{id}	🔍 Получить одну книгу	ID книги (int)	JSON (SBook)	200 OK / 404 Not Found
-    PUT	/books/{id}	✏️ Полное обновление книги	ID + JSON (SBookAdd)	JSON (SBook)	200 OK / 404 Not Found
-    DELETE	/books/{id}	🗑 Удалить книгу	ID книги	Пусто	204 No Content / 404 Not Found
+2. Установка
+```bash
+pip install fastapi uvicorn sqlalchemy aiosqlite pydantic
+```
 
+3. Запуск
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-🔧 Примеры запросов
-Добавление книги
-    curl -X POST http://localhost:8000/books \
-    -H "Content-Type: application/json" \
-    -d '{"title":"Война и мир","author":"Л.Н. Толстой","year":1869,"pages":1225}'
-    
-Получение всех книг
-    curl http://localhost:8000/books
-    
-Получение книги по ID
-    curl http://localhost:8000/books/1
-    
-Обновление книги
-    curl -X PUT http://localhost:8000/books/1 \
-    -H "Content-Type: application/json" \
-    -d '{"title":"Война и мир","author":"Л.Н. Толстой","year":1869,"pages":1230}'
+4. Документация
+Swagger: http://localhost:8000/docs
 
-Удаление книги
-    curl -X DELETE http://localhost:8000/books/1
+ReDoc: http://localhost:8000/redoc
 
-    
-🛠 Технологии:
+🧪 Примеры запросов
+➕ Добавить книгу
+``` bash
+curl -X POST "http://localhost:8000/books/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Война и мир",
+    "author": "Л.Н. Толстой",
+    "year": 1869,
+    "pages": 1225,
+    "is_read": false
+  }'
+```
 
-* Python 3.12+
+📖 Все книги
+```bash
+curl "http://localhost:8000/books/"
+```
 
-* FastAPI
+🔍 Книга по ID
+```bash
+curl "http://localhost:8000/books/1"
+```
 
-* SQLAlchemy (async)
+✏️ Обновить
+```bash
+curl -X PUT "http://localhost:8000/books/1" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Война и мир (обновлено)","pages":1230,"is_read":true}'
+```
 
-* Pydantic
+🗑 Удалить
+```bash
+curl -X DELETE "http://localhost:8000/books/1"
+```
 
-* SQLite (библиотека aiosqlite)
+---
+
+### 🛠 Технологии
+*FastAPI — API фреймворк*
+
+*SQLAlchemy (async) — ORM*
+
+*Pydantic — валидация данных*
+
+*SQLite (aiosqlite) — БД*
+
+*Python 3.12+*
+
+---
+
+### 📁 Репозиторий паттерн
+
+*Repository → SQLAlchemy queries*
+
+*Router → HTTP логика - endpoints (Dependency Injection)*
+
+*Schemas → Валидация (Pydantic)* 
+
+*Models → БД таблицы*
+
+---
+
+### 🤝 Contributing
+Fork проекта
+
+*Создай feature branch (git checkout -b feature/AmazingFeature)*
+
+*Commit изменения (git commit -m 'Add some AmazingFeature')*
+
+*Push (git push origin feature/AmazingFeature)*
+
+*Открой Pull Request*
+
+---
+
+### 📄 Лицензия
+MIT — свободное использование!
+
+* ⭐ Star проект если понравилось!
+* 🐛 Issues/PRs welcome
+* 📞 Связаться: Mustafath GitHub
